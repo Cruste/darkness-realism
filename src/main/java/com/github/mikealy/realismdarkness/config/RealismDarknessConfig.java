@@ -3,7 +3,7 @@ package com.github.mikealy.realismdarkness.config;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class HardcoreDarknessConfig
+public class RealismDarknessConfig
 {
 	int mode;
 
@@ -19,7 +19,7 @@ public class HardcoreDarknessConfig
 	
 	float gammaOverride = -1;
 
-	public HardcoreDarknessConfig()
+	public RealismDarknessConfig()
 	{
 		dimensionBlacklist = new HashSet<Integer>();
 
