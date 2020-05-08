@@ -1,5 +1,7 @@
 package com.github.mikealy.realismdarkness.config;
 
+import java.util.HashSet;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -26,7 +28,7 @@ public class RealismDarknessConfig {
 	public static boolean alternativeNightSky;
 	public static double gammaOverride;
 	public static double moonlightMultiplier;
-	
+	HashSet<Integer> dimensionBlacklist;
 
 	@SubscribeEvent
 	public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
@@ -50,6 +52,7 @@ public class RealismDarknessConfig {
 		public final ForgeConfigSpec.BooleanValue alternativeNightSky;
 		public final ForgeConfigSpec.DoubleValue gammaOverride;
 		public final ForgeConfigSpec.DoubleValue moonlightMultiplier;
+		public final ForgeConfigSpec.ConfigValue<HashSet<Integer>> dimensionBlacklist;
 
 		public ClientConfig(ForgeConfigSpec.Builder builder) {
 			mode = builder
@@ -80,7 +83,10 @@ public class RealismDarknessConfig {
 					.comment("Set the maximum moon brightness to this multiple of the original brightness between 0 and 1 (Only applicable in mode 2)")
 					.translation(RealismDarkness.MOD_ID + ".config." + "moonlightMultiplier")
 					.defineInRange("moonlightMultiplier", 0.3D, 0D, 1D);
-			
+			dimensionBlacklist = builder
+					.comment("Blacklist dimensions which Hardcore Darkness should not work in")
+					.translation(RealismDarkness.MOD_ID + ".config." + "dimensionBlacklist")
+					.define("dimensionBlacklist", new HashSet<>());
 		}
 	}
 }
