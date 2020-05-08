@@ -1,122 +1,87 @@
 package com.github.mikealy.realismdarkness.config;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import org.apache.commons.lang3.tuple.Pair;
 
-public class RealismDarknessConfig
-{
-	int mode;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.config.ModConfig;
 
-	boolean darkNether;
-	boolean darkEnd;
-	boolean darkTwilightForest;
+import com.github.mikealy.realismdarkness.RealismDarkness;
 
-	boolean alternativeNightSkylight;
+@EventBusSubscriber(modid = RealismDarkness.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+public class RealismDarknessConfig {
+	public static final ClientConfig CLIENT;
+	public static final ForgeConfigSpec CLIENT_SPEC;
+	static {
+		final Pair<ClientConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(ClientConfig::new);
+		CLIENT_SPEC = specPair.getRight();
+		CLIENT = specPair.getLeft();
+	}
 
-	HashSet<Integer> dimensionBlacklist;
-
-	float[] moonLightList = new float[5];
+	public static int mode;
+	public static boolean darkNether;
+	public static boolean darkEnd;
+	public static boolean darkTwilightForest;
+	public static boolean alternativeNightSky;
+	public static double gammaOverride;
+	public static double moonlightMultiplier;
 	
-	float gammaOverride = -1;
 
-	public RealismDarknessConfig()
-	{
-		dimensionBlacklist = new HashSet<Integer>();
-
-		moonLightList[0] = 1F;
-		moonLightList[1] = 0.925F;
-		moonLightList[2] = 0.85F;
-		moonLightList[3] = 0.775F;
-		moonLightList[4] = 0.7F;
+	@SubscribeEvent
+	public static void onModConfigEvent(final ModConfig.ModConfigEvent configEvent) {
+		if (configEvent.getConfig().getSpec() == RealismDarknessConfig.CLIENT_SPEC) {
+			bakeConfig();
+		}
 	}
 
-	public void addDimensionToBlacklist(int dimension)
-	{
-		dimensionBlacklist.add(dimension);
+	public static void bakeConfig() {
+		mode = CLIENT.mode.get();
+		darkNether = CLIENT.darkNether.get();
+		darkEnd = CLIENT.darkEnd.get();
+		darkTwilightForest = CLIENT.darkTwilightForest.get();
 	}
 
-	public boolean isDimensionBlacklisted(int dimension)
-	{
-		return dimensionBlacklist.contains(dimension);
-	}
+	public static class ClientConfig {
+		public final ForgeConfigSpec.IntValue mode;
+		public final ForgeConfigSpec.BooleanValue darkNether;
+		public final ForgeConfigSpec.BooleanValue darkEnd;
+		public final ForgeConfigSpec.BooleanValue darkTwilightForest;
+		public final ForgeConfigSpec.BooleanValue alternativeNightSky;
+		public final ForgeConfigSpec.DoubleValue gammaOverride;
+		public final ForgeConfigSpec.DoubleValue moonlightMultiplier;
 
-	public HashSet<Integer> getDimensionBlackList()
-	{
-		return dimensionBlacklist;
-	}
-
-	public void setMode(int newMode)
-	{
-		this.mode = newMode;
-	}
-
-	public void setDarkNether(boolean darkNether)
-	{
-		this.darkNether = darkNether;
-	}
-
-	public void setDarkEnd(boolean darkEnd)
-	{
-		this.darkEnd = darkEnd;
-	}
-	
-	public void setDarkTwilightForest(boolean darkTwilightForest)
-	{
-		this.darkTwilightForest = darkTwilightForest;
-	}
-
-	public void setAlternativeNightSkylight(boolean alternativeNightSkylight)
-	{
-		this.alternativeNightSkylight = alternativeNightSkylight;
-	}
-
-	public int getMode()
-	{
-		return mode;
-	}
-
-	public boolean darkNether()
-	{
-		return darkNether;
-	}
-
-	public boolean darkEnd()
-	{
-		return darkEnd;
-	}
-	
-	public boolean darkTwilightForest() {
-		return darkTwilightForest;
-	}
-
-	public boolean removeBlue()
-	{
-		return alternativeNightSkylight;
-	}
-
-	@Override
-	public String toString()
-	{
-		return "HardcoreDarknessConfig [mode=" + mode + ", darkNether=" + darkNether + ", darkEnd=" + darkEnd + ", darkTwilightForest=" + darkTwilightForest + ", alternativeNightSkylight=" + alternativeNightSkylight + ", dimensionBlacklist=" + dimensionBlacklist + ", moonLightList=" + Arrays.toString(moonLightList) + ", gammaOverride=" + gammaOverride + "]";
-	}
-
-	public float[] getMoonLightList()
-	{
-		return moonLightList;
-	}
-
-	public void setMoonLightList(float[] newList)
-	{
-		this.moonLightList = newList;
-	}
-	
-	public float getGammaOverride()
-	{
-		return gammaOverride;
-	}
-	
-	public void setGammaOverride(float gammaOverride)
-	{
-		this.gammaOverride = gammaOverride;
+		public ClientConfig(ForgeConfigSpec.Builder builder) {
+			mode = builder
+					.comment("Display darkness mode: 0: No minimum sky & block light, 1: No minimum block light, 2: Skylight is dependent on moon phase")
+					.translation(RealismDarkness.MOD_ID + ".config." + "mode")
+					.defineInRange("mode", 0, 0, 2);
+			darkNether = builder
+					.comment("Should the Nether have its minimum light removed")
+					.translation(RealismDarkness.MOD_ID + ".config." + "darkNether")
+					.define("darkNether", true);
+			darkEnd = builder
+					.comment("Should the End have its minimum light removed")
+					.translation(RealismDarkness.MOD_ID + ".config." + "darkEnd")
+					.define("darkEnd", false);
+			darkTwilightForest = builder
+					.comment("Should the Twilight Forest have its minimum light removed")
+					.translation(RealismDarkness.MOD_ID + ".config." + "darkTwilightForest")
+					.define("darkTwilightForest", true);
+			alternativeNightSky = builder
+					.comment("Should the night sky in modes 1 and 2 be changed to a greener colour")
+					.translation(RealismDarkness.MOD_ID + ".config." + "alternativeNightSky")
+					.define("alternativeNightSky", true);
+			gammaOverride = builder
+					.comment("Lock the sky brightness to some value between 0 and 1, -1 to disable")
+					.translation(RealismDarkness.MOD_ID + ".config." + "gammaOverride")
+					.defineInRange("gammaOverride", -1D, -1D, 1D);
+			moonlightMultiplier = builder
+					.comment("Set the maximum moon brightness to this multiple of the original brightness between 0 and 1 (Only applicable in mode 2)")
+					.translation(RealismDarkness.MOD_ID + ".config." + "moonlightMultiplier")
+					.defineInRange("moonlightMultiplier", 0.3D, 0D, 1D);
+			
+		}
 	}
 }
+
