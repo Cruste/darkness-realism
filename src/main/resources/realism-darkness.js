@@ -28,18 +28,18 @@ function initializeCoreMod() {
 				inject.add(new MethodInsnNode(op.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "stopNetherLight", "()Z", false));
 				inject.add(new JumpInsnNode(op.IFEQ, l1));
 				inject.add(new VarInsnNode(op.ALOAD, 0));
-				inject.add(new MethodInsnNode(op.INVOKESPECIAL, "net/minecraft/world/dimension/Dimension", ASMAPI.mapMethod("func_76556_a"), "()V", false));
+				inject.add(new MethodInsnNode(op.INVOKESPECIAL, "net/minecraft/world/dimension/NetherDimension", ASMAPI.mapMethod("func_76556_a"), "()V", false));
 				inject.add(l1);
 				methodNode.instructions.insert(firstInstruction(methodNode.instructions), inject);
 				print("Injected nether light handler")
 				return methodNode;
 			}
 		},
-		"World#getSunBrightnessBody": {
+		"World#getSunBrightness": {
 			"target": {
 				"type": "METHOD",
 				"class": "net.minecraft.world.World",
-				"methodName": "getSunBrightnessBody",
+				"methodName": "func_72971_b",
 				"methodDesc": "(F)F"
 			},
 			"transformer": function(methodNode) {
@@ -60,13 +60,14 @@ function initializeCoreMod() {
 						}
 					}
 				}
+				return methodNode;
 			}
 		},
-		"GameRenderer": {
+		"LightTexture#updateLightmap": {
 			"target": {
 				"type": "METHOD",
-				"class": "net.minecraft.client.renderer.GameRenderer",
-				"methodName": "func_78472_g",
+				"class": "net.minecraft.client.renderer.LightTexture",
+				"methodName": "func_205106_a",
 				"methodDesc": "(F)V"
 			},
 			"transformer": function(methodNode) {
@@ -76,17 +77,14 @@ function initializeCoreMod() {
 				var a0 = 0.05;
 				var a3 = 0.03;
 
-				var potion = false;
 				for (var i = 0; i < methodNode.instructions.size(); i++) {
 					var an = methodNode.instructions.get(i);
 					if (typeof(an) == LdcInsnNode) {
-						if (!potion) {
-							if (an.cst.toFixed(2) == m0 || an.cst.toFixed(2) == m3) {
-								methodNode.instructions.insert(an, new MethodInsnNode(op.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "up", "(F)F", false));
-							}
-							else if (an.cst.toFixed(2) == a0 || an.cst.toFixed(2) == a3) {
-								methodNode.instructions.insert(an, new MethodInsnNode(op.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "down", "(F)F", false));
-							}
+						if (an.cst.toFixed(2) == m0 || an.cst.toFixed(2) == m3) {
+							methodNode.instructions.insert(an, new MethodInsnNode(op.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "up", "(F)F", false));
+						}
+						else if (an.cst.toFixed(2) == a0 || an.cst.toFixed(2) == a3) {
+							methodNode.instructions.insert(an, new MethodInsnNode(op.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "down", "(F)F", false));
 						}
 					}
 					else if (typeof(an) == MethodInsnNode) {
@@ -119,10 +117,9 @@ function initializeCoreMod() {
 
 								methodNode.instructions.insert(insertAfter, instructions);
 								print("Patched Nightvision Potion");
-								i += 18;
 							}
 						}
-						else if (an.name.equals(ASMAPI.mapMethod("func_186068_a"))) {
+						else if (an.name.equals(ASMAPI.mapMethod("func_186058_p"))) {
 							var toInsert = new InsnList();
 							var l0 = new LabelNode(new Label());
 							toInsert.add(new MethodInsnNode(op.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "stopEndLight", "()Z", false));
@@ -145,13 +142,12 @@ function initializeCoreMod() {
 
 							updateLightmap.instructions.insertBefore(an, toInsert);
 							print("Patched Lightmap Manipulation");
-							i += 5;
 						}
 					}
 					else if (typeof(an) == FieldInsnNode) {
 
 						if (an.name.equals(ASMAPI.mapfield("field_74333_Y"))) {
-							updateLightmap.instructions.insert(an, new MethodInsnNode(Opcodes.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "overrideGamma", "(F)F", false));
+							methodNode.instructions.insert(an, new MethodInsnNode(Opcodes.INVOKESTATIC, "com/github/mikealy/realismdarkness/handler/AsmHandler", "overrideGamma", "(F)F", false));
 						}
 					}
 				}
